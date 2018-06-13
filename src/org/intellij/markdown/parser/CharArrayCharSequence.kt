@@ -10,7 +10,7 @@ class CharArrayCharSequence(private val chars: CharArray,
 
     override fun subSequence(startIndex: Int, endIndex: Int): CharSequence {
         if (startIndex > endIndex || !checkIndex(startIndex) || !checkIndex(endIndex)) {
-            throw IndexOutOfBoundsException()
+            throw IndexOutOfBoundsException("$startIndex..$endIndex does not lie within 0..$length")
         }
         return CharArrayCharSequence(chars, start + startIndex, endIndex - startIndex)
     }

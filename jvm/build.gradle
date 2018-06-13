@@ -14,6 +14,9 @@ buildscript {
 
 
 repositories {
+    flatDir {
+        dirs 'lib'
+    }
     mavenCentral()
 }
 
@@ -22,11 +25,14 @@ apply plugin: 'kotlin-platform-jvm'
 dependencies {
     expectedBy project(":")
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testCompile name: 'idea_rt'
+    testCompile 'junit:junit:4.12'
 }
 
 sourceSets {
 //    main.js.srcDirs = ['src']
     main.kotlin.srcDirs = ['src']
-//
-//    main.resources.srcDirs = []
+    test.kotlin.srcDirs = ['test']
 }

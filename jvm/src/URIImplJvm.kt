@@ -26,5 +26,5 @@ actual fun urlEncode(str: String): String {
 }
 
 actual fun String(charArray: CharArray, start: Int, length: Int): String {
-    return String(charArray, start, length)
+    return java.lang.String(charArray, start, length).toString()
 }
