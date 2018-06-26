@@ -11,9 +11,7 @@ actual fun assertSameLinesWithFile(path: String, result: String) {
 }
 
 actual fun getIntellijMarkdownHome(): String {
-    return "/home/user/work/intellij-markdown/"
-
-//    return "."
+    return (js("process.cwd()") as String) + "/.."
 }
 
 actual abstract class TestCase {

@@ -24,8 +24,7 @@ actual fun assertSameLinesWithFile(path: String, result: String) {
 }
 
 actual fun getIntellijMarkdownHome(): String {
-    return "/home/user/work/intellij-markdown/"
-//    return System.getProperty(INTELLIJ_MARKDOWN_TEST_KEY) ?: "."
+    return System.getProperty(INTELLIJ_MARKDOWN_TEST_KEY) ?: System.getProperty("user.dir") + "/.."
 }
 
 actual typealias TestCase = junit.framework.TestCase

@@ -55,7 +55,11 @@ node {
     nodeModulesDir = buildDir
 }
 
-task installNodeModules(type: NpmTask) {
+task initNpm(type: NpmTask) {
+    args = ['init', '--yes']
+}
+
+task installNodeModules(type: NpmTask, dependsOn: [initNpm]) {
     args = ['install', 'mocha', "kotlin@$kotlin_version", "kotlin-test@$kotlin_version"]
 }
 
