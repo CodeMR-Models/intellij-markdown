@@ -1,10 +1,9 @@
 package org.intellij.markdown.parser
 
-import org.intellij.markdown.html.String
 
-class CharArrayCharSequence(private val chars: CharArray,
+class CharArrayCharSequence(private val chars: String,
                             private val start: Int = 0,
-                            override val length: Int = chars.size - start) : CharSequence {
+                            override val length: Int = chars.length - start) : CharSequence {
 
     override fun get(index: Int): Char = chars[start + index]
 
@@ -14,14 +13,11 @@ class CharArrayCharSequence(private val chars: CharArray,
         }
         return CharArrayCharSequence(chars, start + startIndex, endIndex - startIndex)
     }
-    
+
     private fun checkIndex(index: Int) = index >= 0 && index <= length
 
-    
-    
     override fun toString(): String {
-        chars.asList().subList(start, start + length).toString()
-        return String(chars, start, length)
+        return chars.substring(start, start + length)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -30,7 +26,7 @@ class CharArrayCharSequence(private val chars: CharArray,
         if (other::class != this::class) return false
 
         other as CharArrayCharSequence
-        
+
         if (other.length != length) return false
         for (i in 0..length - 1) {
             if (get(i) != other.get(i)) {

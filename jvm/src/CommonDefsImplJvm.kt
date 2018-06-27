@@ -24,7 +24,3 @@ actual fun isPunctuation(char: Char): Boolean {
 actual fun urlEncode(str: String): String {
     return URLEncoder.encode(str, "UTF-8")
 }
-
-actual fun String(charArray: CharArray, start: Int, length: Int): String {
-    return java.lang.String(charArray, start, length).toString()
-}

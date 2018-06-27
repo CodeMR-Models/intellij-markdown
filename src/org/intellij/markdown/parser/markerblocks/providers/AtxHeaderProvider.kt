@@ -47,18 +47,24 @@ class AtxHeaderProvider(private val requireSpace: Boolean) : MarkerBlockProvider
 
     private fun matches(pos: LookaheadText.Position): IntRange? {
         if (pos.offsetInCurrentLine != -1) {
-            val matchResult = getRegex().find(pos.currentLineFromPosition)
-            if (matchResult != null) {
-                TODO("return matchResult.groups[1]!!.range does not work in JS")
+            val text = pos.currentLineFromPosition
+            var offset = MarkerBlockProvider.passSmallIndent(text)
+            if (offset >= text.length || text[offset] != '#') {
+                return null
             }
+            
+            val start = offset
+            repeat(6) {
+                if (offset < text.length && text[offset] == '#') {
+                    offset++
+                }
+            }
+            
+            if (requireSpace && offset < text.length && text[offset] != ' ') {
+                return null
+            }
+            return IntRange(start, offset - 1)
         }
         return null
-    }
-    
-    private fun getRegex() = if (requireSpace) REGEX_WITH_SPACE else REGEX_NO_SPACE
-
-    companion object {
-        val REGEX_WITH_SPACE: Regex = Regex("\\A {0,3}(#{1,6})( |$)")
-        val REGEX_NO_SPACE: Regex = Regex("\\A {0,3}(#{1,6})")
     }
 }
