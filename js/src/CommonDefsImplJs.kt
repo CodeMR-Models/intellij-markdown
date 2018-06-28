@@ -2,13 +2,36 @@ package org.intellij.markdown.html
 
 import org.w3c.dom.url.URL
 
-actual class URI actual constructor(val str: String) {
-    actual fun resolve(str: String): URI {
-        return URI(URL(str, this.str).href)
+actual class URI actual constructor(str: String) {
+    private val base = if (isGoodURL(str)) {
+        str
+    } else {
+        fakeStart + str
     }
 
+    actual fun resolve(str: String): URI {
+        return URI(trimFake(URL(str, base).href))
+    }
+
+
     override fun toString(): String {
-        return str
+        return trimFake(base)
+    }
+
+    companion object {
+        private const val fakeStart = "fake://"
+        
+        private fun isGoodURL(str: String): Boolean {
+            return try {
+                URL(str); true
+            } catch (e: Throwable) {
+                false
+            }
+        }
+        
+        private fun trimFake(str: String): String {
+            return str.substringAfter(fakeStart)
+        }
     }
 }
 

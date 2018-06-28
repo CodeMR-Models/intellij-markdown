@@ -52,6 +52,7 @@ compileTestKotlin2Js {
 
 node {
     download = true
+    version = '10.5.0'
     nodeModulesDir = buildDir
 }
 
