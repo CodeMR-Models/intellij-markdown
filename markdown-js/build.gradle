@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.30'
+    ext.kotlin_version = '1.2.50'
 
     repositories {
         jcenter()
@@ -31,23 +31,25 @@ dependencies {
 }
 
 sourceSets {
-//    main.javascript.srcDirs = ['src']
     main.kotlin.srcDirs = ['src']
     test.kotlin.srcDirs = ['test']
-
-//
-//    main.resources.srcDirs = []
 }
 
 compileKotlin2Js {
-    kotlinOptions.outputFile = "${projectDir}/web/output.js"
-    kotlinOptions.moduleKind = "umd"
-    kotlinOptions.sourceMap = true
+    kotlinOptions {
+        outputFile = "${projectDir}/build/classes/main/${name}.js"
+        moduleKind = "umd"
+        sourceMap = true
+        sourceMapEmbedSources = "always"
+    }
 }
 
 compileTestKotlin2Js {
-    kotlinOptions.moduleKind = "umd"
-    kotlinOptions.sourceMap = true
+    kotlinOptions {
+        moduleKind = "umd"
+        sourceMap = true
+        sourceMapEmbedSources = "always"
+    }
 }
 
 node {
@@ -74,3 +76,5 @@ task runMocha(type: NodeTask, dependsOn: [compileTestKotlin2Js, installNodeModul
 }
 
 test.dependsOn runMocha
+
+configurePublishing markdown_version

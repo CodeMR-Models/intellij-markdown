@@ -1,6 +1,4 @@
 buildscript {
-    ext.kotlin_version = '1.2.30'
-
     repositories {
         jcenter()
         mavenCentral()
@@ -32,7 +30,21 @@ dependencies {
 }
 
 sourceSets {
-//    main.js.srcDirs = ['src']
     main.kotlin.srcDirs = ['src']
     test.kotlin.srcDirs = ['test']
 }
+
+task performanceTest(type: Test, group: 'verification', dependsOn: [classes, testClasses]) {
+    useJUnit {
+        includeCategories 'org.intellij.markdown.ParserPerformanceTest'
+    }
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}
+
+sourceCompatibility=1.6
+targetCompatibility=1.6
+
+configurePublishing markdown_version
+
