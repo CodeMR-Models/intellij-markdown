@@ -1,5 +1,6 @@
 package org.intellij.markdown
 
+import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.MarkdownFlavourDescriptor
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
@@ -11,12 +12,12 @@ import kotlin.test.*
 class HtmlGeneratorTest : TestCase() {
     private fun defaultTest(flavour: MarkdownFlavourDescriptor = CommonMarkFlavourDescriptor(),
                             baseURI: URI? = null,
-                            customizer: AttributesCustomizer = DUMMY_ATTRIBUTES_CUSTOMIZER) {
+                            tagRenderer: HtmlGenerator.TagRenderer = HtmlGenerator.DefaultTagRenderer(DUMMY_ATTRIBUTES_CUSTOMIZER, false)) {
 
         val src = readFromFile(getTestDataPath() + "/" + testName + ".md")
         val tree = MarkdownParser(flavour).buildMarkdownTreeFromString(src)
         val htmlGeneratingProviders = flavour.createHtmlGeneratingProviders(LinkMap.buildLinkMap(tree, src), baseURI)
-        val html = HtmlGenerator(src, tree, htmlGeneratingProviders, includeSrcPositions = false).generateHtml(customizer)
+        val html = HtmlGenerator(src, tree, htmlGeneratingProviders, includeSrcPositions = false).generateHtml(tagRenderer)
 
         val result = formatHtmlForTests(html)
 
@@ -99,12 +100,12 @@ class HtmlGeneratorTest : TestCase() {
 
     @Test
     fun testImages() {
-        defaultTest(customizer = { node, _, attributes ->
+        defaultTest(tagRenderer = HtmlGenerator.DefaultTagRenderer(customizer = { node, _, attributes ->
             when {
                 node.type == MarkdownElementTypes.IMAGE -> attributes + "style=\"max-width: 100%\""
                 else -> attributes
             }
-        })
+        }, includeSrcPositions = false))
     }
 
     @Test
@@ -165,6 +166,28 @@ class HtmlGeneratorTest : TestCase() {
     @Test
     fun testBaseUriWithBadRelativeUrl() {
         defaultTest(baseURI = URI("user/repo-name/blob/master"))
+    }
+
+    @Test
+    fun testBaseUriWithAnchorLink() {
+        defaultTest(baseURI = URI("/user/repo-name/blob/master"))
+    }
+    
+    @Test
+    fun testCustomRenderer() {
+        defaultTest(tagRenderer = object: HtmlGenerator.TagRenderer {
+            override fun openTag(node: ASTNode, tagName: CharSequence, vararg attributes: CharSequence?, autoClose: Boolean): CharSequence {
+                return "OPEN TAG($tagName)\n"
+            }
+
+            override fun closeTag(tagName: CharSequence): CharSequence {
+                return "CLOSE TAG($tagName)\n"
+            }
+
+            override fun printHtml(html: CharSequence): CharSequence {
+                return "HTML($html)\n"
+            }
+        })
     }
 
     companion object {
