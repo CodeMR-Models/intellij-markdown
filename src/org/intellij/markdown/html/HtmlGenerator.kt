@@ -29,18 +29,21 @@ class HtmlGenerator(private val markdownText: String,
     
     private val htmlString: StringBuilder = StringBuilder()
 
+    @Deprecated("To be removed, pass custom visitor instead", 
+            ReplaceWith("generateHtml(HtmlGeneratingVisitor)"))
+    fun generateHtml(customizer: AttributesCustomizer): String {
+        HtmlGeneratingVisitor(DefaultTagRenderer(customizer, includeSrcPositions)).visitNode(root)
+        return htmlString.toString()
+    }
+
     @JvmOverloads
-    fun generateHtml(customizer: AttributesCustomizer = DUMMY_ATTRIBUTES_CUSTOMIZER): String {
-        HtmlGeneratingVisitor(customizer).visitNode(root)
+    fun generateHtml(tagRenderer: TagRenderer =
+                             DefaultTagRenderer(DUMMY_ATTRIBUTES_CUSTOMIZER, includeSrcPositions)): String {
+        HtmlGeneratingVisitor(tagRenderer).visitNode(root)
         return htmlString.toString()
     }
 
-    fun generateHtml(visitor: HtmlGeneratingVisitor): String {
-        visitor.visitNode(root)
-        return htmlString.toString()
-    }
-
-    open inner class HtmlGeneratingVisitor @JvmOverloads constructor(private val customizer: AttributesCustomizer = DUMMY_ATTRIBUTES_CUSTOMIZER) : RecursiveVisitor() {
+    inner class HtmlGeneratingVisitor(private val tagRenderer: TagRenderer) : RecursiveVisitor() {
         override fun visitNode(node: ASTNode) {
             providers[node.type]?.processNode(this, markdownText, node)
                     ?: node.acceptChildren(this)
@@ -51,34 +54,58 @@ class HtmlGenerator(private val markdownText: String,
                     ?: consumeHtml(leafText(markdownText, node))
         }
 
-        open fun consumeTagOpen(node: ASTNode,
+        fun consumeTagOpen(node: ASTNode,
                                 tagName: CharSequence,
                                 vararg attributes: CharSequence?,
                                 autoClose: Boolean = false) {
-            htmlString.append("<$tagName")
-            for (attribute in customizer.invoke(node, tagName, attributes.asIterable())) {
-                if (attribute != null) {
-                    htmlString.append(" $attribute")
+            htmlString.append(tagRenderer.openTag(node, tagName, *attributes, autoClose = autoClose))
+        }
+
+        fun consumeTagClose(tagName: CharSequence) {
+            htmlString.append(tagRenderer.closeTag(tagName))
+        }
+
+        fun consumeHtml(html: CharSequence) {
+            htmlString.append(tagRenderer.printHtml(html))
+        }
+    }
+    
+    open class DefaultTagRenderer(protected val customizer: AttributesCustomizer, 
+                                  protected val includeSrcPositions: Boolean) : TagRenderer {
+        override fun openTag(node: ASTNode, tagName: CharSequence, vararg attributes: CharSequence?, autoClose: Boolean): CharSequence {
+            return buildString {
+                append("<$tagName")
+                for (attribute in customizer.invoke(node, tagName, attributes.asIterable())) {
+                    if (attribute != null) {
+                        append(" $attribute")
+                    }
+                }
+                if (includeSrcPositions) {
+                    append(" ${getSrcPosAttribute(node)}")
+                }
+
+                if (autoClose) {
+                    append(" />")
+                } else {
+                    append(">")
                 }
             }
-            if (includeSrcPositions) {
-                htmlString.append(" ${getSrcPosAttribute(node)}")
-            }
-
-            if (autoClose) {
-                htmlString.append(" />")
-            } else {
-                htmlString.append(">")
-            }
         }
 
-        open fun consumeTagClose(tagName: CharSequence) {
-            htmlString.append("</$tagName>")
-        }
+        override fun closeTag(tagName: CharSequence): CharSequence = "</$tagName>"
 
-        open fun consumeHtml(html: CharSequence) {
-            htmlString.append(html)
-        }
+        override fun printHtml(html: CharSequence): CharSequence = html
+    }
+    
+    interface TagRenderer {
+        fun openTag(node: ASTNode,
+                    tagName: CharSequence,
+                    vararg attributes: CharSequence?,
+                    autoClose: Boolean = false): CharSequence
+        
+        fun closeTag(tagName: CharSequence): CharSequence
+        
+        fun printHtml(html: CharSequence): CharSequence
     }
 
     companion object {
