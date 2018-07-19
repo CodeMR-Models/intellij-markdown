@@ -184,7 +184,9 @@ TAG_END = "</" {TAG_NAME} {WHITE_SPACE}* ">"
 SCHEME = [a-zA-Z]+
 AUTOLINK = "<" {SCHEME} ":" [^ \t\f\n<>]+ ">"
 EMAIL_AUTOLINK = "<" [a-zA-Z0-9.!#$%&'*+/=?\^_`{|}~-]+ "@"[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])? (\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)* ">"
-GFM_AUTOLINK = (("http" "s"? | "ftp")"://" | "www.") ({ALPHANUM}([a-zA-Z0-9-]*{ALPHANUM})? ".")+ [a-zA-Z]{2,6} ("/"[a-zA-Z0-9.,+%_&!?#=-]+)* "/"?
+
+HOST_PART={ALPHANUM}([a-zA-Z0-9_-]*{ALPHANUM})?
+GFM_AUTOLINK = (("http" "s"? | "ftp" | "file")"://" | "www.") {HOST_PART} ("." {HOST_PART})* (":" [0-9]+)? ("/"[a-zA-Z0-9.,+%_&()!?#=-]+)* [a-zA-Z0-9#/]
 
 %state TAG_START, AFTER_LINE_START, PARSE_DELIMITED, CODE
 
@@ -281,7 +283,7 @@ GFM_AUTOLINK = (("http" "s"? | "ftp")"://" | "www.") ({ALPHANUM}([a-zA-Z0-9-]*{A
 
   {GFM_AUTOLINK} { return GFMTokenTypes.GFM_AUTOLINK; }
 
-  {ALPHANUM}+ / {WHITE_SPACE}+ {GFM_AUTOLINK} {
+  {ALPHANUM}+ (({WHITE_SPACE}+ | "_"+) {ALPHANUM}+)* / {WHITE_SPACE}+ {GFM_AUTOLINK} {
     return MarkdownTokenTypes.TEXT;
   }
 
