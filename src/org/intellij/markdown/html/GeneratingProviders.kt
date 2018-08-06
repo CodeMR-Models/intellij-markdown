@@ -3,11 +3,11 @@ package org.intellij.markdown.html
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.*
+import org.intellij.markdown.ast.impl.ListCompositeNode
 import org.intellij.markdown.ast.impl.ListItemCompositeNode
 import org.intellij.markdown.html.entities.EntityConverter
 import org.intellij.markdown.lexer.Compat.assert
 import org.intellij.markdown.parser.LinkMap
-import org.intellij.markdown.html.URI
 import kotlin.text.Regex
 
 abstract class OpenCloseGeneratingProvider : GeneratingProvider {
@@ -105,7 +105,10 @@ internal class ListItemGeneratingProvider : SimpleTagProvider("li") {
         assert(node is ListItemCompositeNode)
 
         openTag(visitor, text, node)
-        val isLoose = (node as ListItemCompositeNode).parent!!.loose
+
+        val listNode = node.parent
+        assert(listNode is ListCompositeNode)
+        val isLoose = (listNode as ListCompositeNode).loose
 
         for (child in node.children) {
             if (child.type == MarkdownElementTypes.PARAGRAPH && !isLoose) {
