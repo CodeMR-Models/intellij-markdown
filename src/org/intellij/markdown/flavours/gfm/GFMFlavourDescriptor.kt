@@ -4,6 +4,7 @@ import org.intellij.markdown.IElementType
 import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.MarkdownTokenTypes
 import org.intellij.markdown.ast.ASTNode
+import org.intellij.markdown.ast.getParentOfType
 import org.intellij.markdown.ast.getTextInNode
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.intellij.markdown.flavours.gfm.lexer._GFMLexer
@@ -52,6 +53,15 @@ class GFMFlavourDescriptor : CommonMarkFlavourDescriptor() {
                 GFMTokenTypes.GFM_AUTOLINK to object : GeneratingProvider {
                     override fun processNode(visitor: HtmlGenerator.HtmlGeneratingVisitor, text: String, node: ASTNode) {
                         val linkDestination = node.getTextInNode(text)
+
+                        // #28: do not render GFM autolinks under link titles
+                        // (though it's "OK" according to CommonMark spec)
+                        if (node.getParentOfType(MarkdownElementTypes.LINK_LABEL,
+                                        MarkdownElementTypes.LINK_TEXT) != null) {
+                            visitor.consumeHtml(linkDestination)
+                            return
+                        }
+
                         visitor.consumeTagOpen(node, "a", "href=\"$linkDestination\"")
                         visitor.consumeHtml(linkDestination)
                         visitor.consumeTagClose("a")

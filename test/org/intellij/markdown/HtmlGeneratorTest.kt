@@ -119,6 +119,11 @@ class HtmlGeneratorTest : TestCase() {
     }
 
     @Test
+    fun testBug28() {
+        defaultTest(GFMFlavourDescriptor())
+    }
+
+    @Test
     fun testStrikethrough() {
         defaultTest(GFMFlavourDescriptor())
     }
