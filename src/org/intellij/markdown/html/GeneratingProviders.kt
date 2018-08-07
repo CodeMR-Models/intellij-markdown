@@ -191,12 +191,7 @@ internal abstract class LinkGeneratingProvider(protected val baseURI: URI?) : Ge
     }
 
     protected fun makeAbsoluteUrl(destination : CharSequence) : CharSequence {
-        try {
-            return baseURI?.resolve(destination.toString())?.toString() ?: destination
-        }
-        catch (e : IllegalArgumentException) {
-            return destination
-        }
+        return baseURI?.resolveToStringSafe(destination.toString()) ?: destination
     }
 
     open fun renderLink(visitor: HtmlGenerator.HtmlGeneratingVisitor, text: String, node: ASTNode, info: RenderInfo) {
