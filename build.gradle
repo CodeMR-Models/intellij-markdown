@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        kotlin_version = '1.2.50'
+        kotlin_version = '1.2.60'
         markdown_version = (hasProperty('buildNumber') ? "0.2.0.pre-$buildNumber" : "0.2.0.pre-SNAPSHOT")
     }
 
