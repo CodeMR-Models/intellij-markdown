@@ -1,0 +1,1 @@
+var CodeMR_ProjectMetrics = {"Project Name":"intellij-markdown-master working set: {intellij-markdown-master_main}", "Number of Highly Problematic Classes":0, "Number of Entities":169, "Number of Problematic Classes":2, "Class Lines of Code":7862, "Number of External Packages":8, "Number of Packages":19, "Number of External Entities":25}
